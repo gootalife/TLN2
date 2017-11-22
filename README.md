@@ -1,6 +1,6 @@
 # TLN2
 Twitter Likes NicoNico  
-ニコニコ動画っぽくTwitterのタイムラインが流れてくるやつです。
+ニコニコ動画っぽくTwitterのタイムラインが流れてくるやつです。  
 DLはこちらから→https://github.com/Dy-gtlf/TLN2/releases
 
 ## 使い方
