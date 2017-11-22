@@ -1,9 +1,9 @@
 # TLN2
 Twitter Likes NicoNico  
 ニコニコ動画っぽくTwitterのタイムラインが流れてくるやつです。
+DLはこちらから→https://github.com/Dy-gtlf/TLN2/releases
 
 ## 使い方
-1. あなたのTwitterアプリのConsumerKeyとConsumerSecretをResources.resxに記録して下さい。(リリース版の人は不要)
 1. 起動したブラウザの認証画面に表示されたアプリを認証
 1. PINコードを入力。
 1. あなたのタイムラインがリアルタイムで流れてきます。  
