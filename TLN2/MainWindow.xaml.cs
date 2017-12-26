@@ -1,5 +1,6 @@
 ﻿using CoreTweet;
 using CoreTweet.Streaming;
+using FNF.Utility;
 using Microsoft.VisualBasic;
 using System;
 using System.Linq;
@@ -30,15 +31,15 @@ namespace TLN2
         // トークン関連
         private Tokens tokens;
         private OAuth.OAuthSession session;
+        public UserResponse profile;
 
         // ストリームのリソース
-        private IDisposable filteredStream;
+        private IDisposable filterStream;
         private IDisposable userStream;
 
         // ストリームの状態
         private bool isStreaming;
-        private bool isSearching;
-        string word = "";
+        private bool isFilterStreaming;
 
         // テキストブロックにクリックイベントがないのはなぜだ
         private bool mouseLeftButtonDown;
@@ -46,21 +47,19 @@ namespace TLN2
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// ウィンドウが開いたとき
+        /// </summary>
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
             consumerKey = Properties.Resources.ConsumerKey;
             consumerSecret = Properties.Resources.ConsumerSecret;
             accessToken = Properties.Settings.Default.AccessToken;
             accessTokenSecret = Properties.Settings.Default.AccessTokenSecret;
             // タスクトレイのアイコン設定
             TaskTrayIcon.Icon = Properties.Resources.Icon;
-            // Jumpモードの設定
-            if (Properties.Settings.Default.IsJumpMode == true)
-            {
-                JumpModeMenu.Header = "ツイートを開く を無効にする";
-            }
-            else
-            {
-                JumpModeMenu.Header = "ツイートを開く を有効にする";
-            }
             // 認証されていない時
             if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(accessTokenSecret))
             {
@@ -70,170 +69,148 @@ namespace TLN2
             else
             {
                 // トークン生成
-                tokens = Tokens.Create(consumerKey, consumerSecret,accessToken, accessTokenSecret);
+                tokens = Tokens.Create(consumerKey, consumerSecret, accessToken, accessTokenSecret);
                 // プロフィールの取得
-                GetUserProfile();
+                GetUserProfileAsync();
             }
-            // ストリーミングの開始
-            StartUserStreaming();
-            isStreaming = true;
         }
 
-        // 認証
-        private void Authenticate()
+        /// <summary>
+        /// 認証
+        /// </summary>
+        private async void Authenticate()
         {
-            // 認証用のURL
-            session = OAuth.Authorize(consumerKey, consumerSecret);
-            Uri url = session.AuthorizeUri;
-            // ブラウザを起動
-            System.Diagnostics.Process.Start(url.ToString());
-            // 取得
-            string pinCode = Interaction.InputBox("PINコードを入力", "認証設定", "", -1, -1);
             try
             {
+                // 認証用のURL
+                session = OAuth.Authorize(consumerKey, consumerSecret);
+                Uri url = session.AuthorizeUri;
+                // ブラウザを起動
+                System.Diagnostics.Process.Start(url.ToString());
+                // 取得
+                string pinCode = "";
+                var task = Task.Run(() =>
+                {
+                    pinCode = Interaction.InputBox("PINコードを入力", "認証設定", "", -1, -1);
+                });
+                await task;
                 // トークンを取得して保存
                 tokens = OAuth.GetTokens(session, pinCode);
                 Properties.Settings.Default.AccessToken = tokens.AccessToken.ToString();
                 Properties.Settings.Default.AccessTokenSecret = tokens.AccessTokenSecret.ToString();
                 Properties.Settings.Default.Save();
-                GetUserProfile();
+                GetUserProfileAsync();
                 MessageBox.Show("認証設定を保存");
             }
             catch
             {
                 MessageBox.Show("入力エラー");
+                Environment.Exit(0);
             }
         }
 
-        // 認証のリセット
-        private void ResetButtonClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 認証のリセット
+        /// </summary>
+        public void ResetToken()
         {
-            UserName.Text = "TLN2\n未認証";
             Properties.Settings.Default.AccessToken = null;
             Properties.Settings.Default.AccessTokenSecret = null;
             Properties.Settings.Default.Save();
-            MessageBox.Show("認証設定をリセット");
             // ストリーミングの切断
-            userStream.Dispose();
+            StopUserStreaming();
+            StopFilterStreaming();
             Authenticate();
         }
 
-        // プロフィールを取得
-        private void GetUserProfile()
+        /// <summary>
+        /// プロフィールの取得
+        /// </summary>
+        private async void GetUserProfileAsync()
         {
-            var task = Task.Run(() =>
+            await Task.Run(() =>
             {
-                UserResponse profile = tokens.Account.VerifyCredentials();
-                Dispatcher.Invoke(new Action(() =>
-                {
-                    UserName.Text = $"TLN2\nNow {profile.Name}@{profile.ScreenName}";
-                }));
+                profile = tokens.Account.VerifyCredentials();
             });
         }
 
-        // ストリーミング
-        private void StartUserStreaming()
+        /// <summary>
+        /// ユーザーストリーミング
+        /// </summary>
+        public void StartUserStreaming()
         {
             var stream = tokens.Streaming.UserAsObservable().Publish();
             // ツイート・リツイートのみ取得
             stream.OfType<StatusMessage>().Subscribe(x => CreateTextBlock(x.Status),
                                                     onError: ex => ErrorUserStreaming());
             userStream = stream.Connect();
+            isStreaming = true;
         }
 
-        // フィルターストリーミング
-        private void StartFilterStreaming(string word)
+        /// <summary>
+        /// フィルターストリーミング
+        /// </summary>
+        public void StartFilterStreaming()
         {
-            var stream = tokens.Streaming.FilterAsObservable(track => word).Publish();
+            var stream = tokens.Streaming.FilterAsObservable(track => Properties.Settings.Default.FilterWord).Publish();
             // ツイート・リツイートのみ取得
             stream.OfType<StatusMessage>().Subscribe(x => CreateTextBlock(x.Status),
                                                     onError: ex => ErrorFilterStreaming());
-            filteredStream = stream.Connect();
+            filterStream = stream.Connect();
+            isFilterStreaming = true;
         }
 
-        // ストリーミングの再接続
+        /// <summary>
+        /// ユーザーストリーミングの再接続
+        /// </summary>
         private void ErrorUserStreaming()
         {
             // 再接続
-            userStream.Dispose();
+            StopUserStreaming();
             StartUserStreaming();
         }
 
-        // ユーザーストリームの開始と停止
-        private void StopButtonClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// ユーザーストリーミングの停止
+        /// </summary>
+        public void StopUserStreaming()
         {
             // ストリームを利用しているなら
             if (isStreaming == true)
             {
-                var task = Task.Run(() =>
-                {
-                    MessageBox.Show("ユーザーストリーミングを停止しました");
-                });
                 // 切断
                 userStream.Dispose();
                 isStreaming = false;
-                StreamMenu.Header = "ユーザーストリーミングを開始";
-            }
-            else
-            {
-                var task = Task.Run(() =>
-                {
-                    MessageBox.Show("ユーザーストリーミングを開始します");
-                });
-                // 接続
-                StartUserStreaming();
-                isStreaming = true;
-                StreamMenu.Header = "ユーザーストリーミングを停止";
             }
         }
 
-        // フィルターストリーミングの再接続
-        private void ErrorFilterStreaming()
+        /// <summary>
+        /// フィルターストリーミングの再接続
+        /// </summary>
+        public void ErrorFilterStreaming()
         {
             // 再接続
-            filteredStream.Dispose();
-            StartFilterStreaming(word);
+            StopFilterStreaming();
+            StartFilterStreaming();
         }
 
-        // フィルターストリーミングの開始と停止
-        private async void SerachButtonClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// フィルターストリーミングの停止
+        /// </summary>
+        public void StopFilterStreaming()
         {
             // 利用中なら
-            if (isSearching == true)
+            if (isFilterStreaming == true)
             {
-                var task = Task.Run(() =>
-                {
-                    MessageBox.Show("検索を停止しました");
-                });
                 // 切断
-                filteredStream.Dispose();
-                isSearching = false;
-                SearchMenu.Header = "指定ワード検索";
-            }
-            else
-            {
-                var task = Task.Run(() =>
-                {
-                    word = Interaction.InputBox("検索するワードを入力", "検索ワード入力", "", -1, -1);
-                });
-                // 入力を待つ
-                await task;
-                // 空欄でないなら
-                if (!string.IsNullOrEmpty(word))
-                {
-                    task = Task.Run(() =>
-                    {
-                        MessageBox.Show($"\"{word}\" で検索を開始します");
-                    });
-                    // 接続
-                    StartFilterStreaming(word);
-                    isSearching = true;
-                    SearchMenu.Header = $"\"{word}\" で検索中";
-                }
+                filterStream.Dispose();
+                isFilterStreaming = false;
             }
         }
 
-        // テキストブロックの生成
+        /// <summary>
+        /// ツイートからテキストブロックの生成
+        /// </summary>
         private void CreateTextBlock(Status status)
         {
             // 日本圏のみ
@@ -241,12 +218,18 @@ namespace TLN2
             {
                 Dispatcher.Invoke(new Action(() =>
                 {
+                    var pattern = @"s?https?://[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+";
                     // ツイートからURLを抽出
-                    var r = new Regex(@"s?https?://[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+", RegexOptions.IgnoreCase);
+                    var r = new Regex(pattern, RegexOptions.IgnoreCase);
                     Match m = r.Match(status.Text);
                     string linkUrl = m.Value;
                     // ツイートからURL,改行を削除
-                    status.Text = Regex.Replace(status.Text, @"s?https?://[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+", "").Replace("\r", "").Replace("\n", "");
+                    status.Text = Regex.Replace(status.Text, pattern, "").Replace("\r", "").Replace("\n", " ");
+                    // 棒読みちゃん
+                    if (Properties.Settings.Default.IsBouyomiChanMode)
+                    {
+                        Bouyomi($"{status.User.Name}、{status.Text}");
+                    }
                     // テキストブロックの初期化
                     var tweet = new TextBlock
                     {
@@ -274,8 +257,8 @@ namespace TLN2
                         Text = linkUrl,
                     });
                     tweet.Inlines.Add(link);
-                    // Jumpモードが有効なら
-                    if (Properties.Settings.Default.IsJumpMode == true)
+                    // ブラウザで開くモードが有効なら
+                    if (Properties.Settings.Default.IsOpenInBrowserMode)
                     {
                         // クリックイベントもどき
                         // テキスト上でボタンを押して離したとき
@@ -308,7 +291,9 @@ namespace TLN2
             }
         }
 
-        // ツイートのアニメーション
+        /// <summary>
+        /// ツイートのアニメーション
+        /// </summary>
         private void MoveTweet(TextBlock tweet)
         {
             var random = new Random();
@@ -338,45 +323,44 @@ namespace TLN2
             deleteTimer.Start();
         }
 
-        // 終了ボタン
+        /// <summary>
+        /// 終了ボタン
+        /// </summary>
         private void QuitButtonClick(object sender, RoutedEventArgs e)
         {
             // ストリーミングの切断
             userStream.Dispose();
-            filteredStream.Dispose();
+            filterStream.Dispose();
             Close();
         }
 
-        // 閉じる前
+        /// <summary>
+        /// 閉じる前
+        /// </summary>
         private void WindowClosed(object sender, EventArgs e)
         {
             // ストリーミングの切断
             userStream.Dispose();
-            filteredStream.Dispose();
+            filterStream.Dispose();
         }
 
-        // クリックでツイートのページを開くかどうか
-        private void JumpModeMenuClick(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 棒読みちゃんで読み上げ
+        /// </summary>
+        private void Bouyomi(string text)
         {
-            if (Properties.Settings.Default.IsJumpMode == true)
-            {
-                Properties.Settings.Default.IsJumpMode = false;
-                var task = Task.Run(() =>
-                {
-                    MessageBox.Show("ツイートを開く を無効にしました");
-                });
-                JumpModeMenu.Header = "ツイートを開く を有効にする";
-            }
-            else
-            {
-                Properties.Settings.Default.IsJumpMode = true;
-                var task = Task.Run(() =>
-                {
-                    MessageBox.Show("ツイートを開く を有効にしました");
-                });
-                JumpModeMenu.Header = "ツイートを開く を無効にする";
-            }
-            Properties.Settings.Default.Save();
+            var bc = new BouyomiChanClient();
+            bc.AddTalkTask(text);
+            bc.Dispose();
+        }
+
+        /// <summary>
+        /// 設定画面を開く
+        /// </summary>
+        private void OpenSettingWindowClick(object sender, EventArgs e)
+        {
+            var window = new SettingWindow(this);
+            window.Show();
         }
     }
 }

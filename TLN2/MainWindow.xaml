@@ -12,21 +12,18 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         Topmost="True"
-        WindowState="Maximized" Closed="WindowClosed">
+        WindowState="Maximized" Closed="WindowClosed" Loaded="WindowLoaded">
     <Canvas Name="Root">
         <tb:TaskbarIcon Name="TaskTrayIcon">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="SearchMenu" Header="指定ワード検索" Click="SerachButtonClick"/>
-                    <MenuItem Name="StreamMenu" Header="ユーザーストリーミングを停止" Click="StopButtonClick"/>
-                    <MenuItem Name="JumpModeMenu" Header="ツイートを開く を無効にする" Click="JumpModeMenuClick"/>
-                    <MenuItem Header="認証設定のリセット" Click="ResetButtonClick"/>
+                    <MenuItem Name="OpenSettingWindow" Header="設定画面を開く" Click="OpenSettingWindowClick"/>
                     <MenuItem Header="終了" Click="QuitButtonClick"/>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
             <tb:TaskbarIcon.TrayToolTip>
-                <Border BorderThickness="1">
-                    <TextBlock Name="UserName" Foreground="Black" Background="White" TextWrapping="Wrap"/>
+                <Border BorderThickness="2">
+                    <TextBlock Foreground="Black" Background="White" TextWrapping="Wrap" Text="TLN2"/>
                 </Border>
             </tb:TaskbarIcon.TrayToolTip>
         </tb:TaskbarIcon>

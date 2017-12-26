@@ -1,0 +1,22 @@
+﻿<Window x:Class="TLN2.SettingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TLN2"
+        mc:Ignorable="d"
+        Title="設定画面" Height="210" Width="200" ResizeMode="NoResize">
+    <Canvas Margin="0,0,20.667,0">
+        <TextBox Name="FilterWord" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Top" Width="109" Grid.ColumnSpan="2" Canvas.Left="64" Canvas.Top="30"/>
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="検索ワード" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="31"/>
+        <CheckBox x:Name="UserStreamingMode" Content="UserStreamを有効化" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Checked="UserStreamModeChecked" Unchecked="UserStreamModeUnchecked" Canvas.Left="10" Canvas.Top="57"/>
+        <CheckBox x:Name="OpenInBrowserMode" Content="クリックでブラウザを開く" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Canvas.Left="10" Canvas.Top="97" Checked="OpenInBrowserModeChecked" Unchecked="OpenInBrowserModeUnchecked"/>
+        <CheckBox Name="BouyomiChanMode" Content="棒読みちゃんで読み上げる" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Canvas.Left="10" Canvas.Top="77" Checked="BouyomiChanModeChecked" Unchecked="BouyomiChanModeUnchecked"/>
+        <Button x:Name="ResetButton" Content="認証設定のリセット" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Canvas.Left="10" Canvas.Top="117" Width="163" Click="ResetButtonClick"/>
+        <TextBlock Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="10"><Run Text="ユーザー"/><Run Text=" "/><Run Text=":"/></TextBlock>
+        <TextBlock x:Name="UserName" Canvas.Left="64" TextWrapping="Wrap" Canvas.Top="10"/>
+        <Button x:Name="ApplyButton" Content="OK" Canvas.Left="10" Canvas.Top="142" Width="80" Click="OKButtonClick"/>
+        <Button x:Name="CancelButton" Content="Cancel" Canvas.Left="93" Canvas.Top="142" Width="80" Click="CancelButtonClick"/>
+
+    </Canvas>
+</Window>

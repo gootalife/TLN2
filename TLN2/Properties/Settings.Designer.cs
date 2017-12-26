@@ -12,7 +12,7 @@ namespace TLN2.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.1.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -49,13 +49,49 @@ namespace TLN2.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool IsJumpMode {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsOpenInBrowserMode {
             get {
-                return ((bool)(this["IsJumpMode"]));
+                return ((bool)(this["IsOpenInBrowserMode"]));
             }
             set {
-                this["IsJumpMode"] = value;
+                this["IsOpenInBrowserMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsBouyomiChanMode {
+            get {
+                return ((bool)(this["IsBouyomiChanMode"]));
+            }
+            set {
+                this["IsBouyomiChanMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsUserStreamingMode {
+            get {
+                return ((bool)(this["IsUserStreamingMode"]));
+            }
+            set {
+                this["IsUserStreamingMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FilterWord {
+            get {
+                return ((string)(this["FilterWord"]));
+            }
+            set {
+                this["FilterWord"] = value;
             }
         }
     }
