@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TLN2"
         mc:Ignorable="d"
-        Title="APIKeySettingwindow" Height="175" Width="245" Loaded="Window_Loaded" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="APIKeySettingwindow" Height="180" Width="245" Loaded="Window_Loaded" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Canvas>
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Consumer Key" VerticalAlignment="Top"/>
         <TextBox Name="ConsumerKeyTextBox" HorizontalAlignment="Left" Height="23" Margin="10,31,0,0" TextWrapping="NoWrap" VerticalAlignment="Top" Width="210"/>
