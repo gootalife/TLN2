@@ -61,24 +61,6 @@ namespace TLN2.Properties {
         }
         
         /// <summary>
-        ///    に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string ConsumerKey {
-            get {
-                return ResourceManager.GetString("ConsumerKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///    に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string ConsumerSecret {
-            get {
-                return ResourceManager.GetString("ConsumerSecret", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   (アイコン) に類似した型 System.Drawing.Icon のローカライズされたリソースを検索します。
         /// </summary>
         internal static System.Drawing.Icon Icon {

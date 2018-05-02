@@ -54,8 +54,8 @@ namespace TLN2
         /// </summary>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            consumerKey = Properties.Resources.ConsumerKey;
-            consumerSecret = Properties.Resources.ConsumerSecret;
+            consumerKey = Properties.Settings.Default.ConsumerKey;
+            consumerSecret = Properties.Settings.Default.ConsumerSecret;
             accessToken = Properties.Settings.Default.AccessToken;
             accessTokenSecret = Properties.Settings.Default.AccessTokenSecret;
             // タスクトレイのアイコン設定
@@ -73,6 +73,10 @@ namespace TLN2
                 // プロフィールの取得
                 GetUserProfileAsync();
             }
+            if (Properties.Settings.Default.IsUserStreamingMode == true)
+            {
+                StartUserStreaming();
+            }
         }
 
         /// <summary>
@@ -88,23 +92,23 @@ namespace TLN2
                 // ブラウザを起動
                 System.Diagnostics.Process.Start(url.ToString());
                 // 取得
-                string pinCode = "";
+                string PIN = "";
                 var task = Task.Run(() =>
                 {
-                    pinCode = Interaction.InputBox("PINコードを入力", "認証設定", "", -1, -1);
+                    PIN = Interaction.InputBox("PINコードを入力", "認証設定", "", -1, -1);
                 });
                 await task;
                 // トークンを取得して保存
-                tokens = OAuth.GetTokens(session, pinCode);
+                tokens = OAuth.GetTokens(session, PIN);
                 Properties.Settings.Default.AccessToken = tokens.AccessToken.ToString();
                 Properties.Settings.Default.AccessTokenSecret = tokens.AccessTokenSecret.ToString();
                 Properties.Settings.Default.Save();
                 GetUserProfileAsync();
-                MessageBox.Show("認証設定を保存");
+                MessageBox.Show(this, "認証設定を保存");
             }
             catch
             {
-                MessageBox.Show("入力エラー");
+                MessageBox.Show(this, "入力エラー");
                 Environment.Exit(0);
             }
         }
@@ -223,9 +227,9 @@ namespace TLN2
                     var r = new Regex(pattern, RegexOptions.IgnoreCase);
                     Match m = r.Match(status.Text);
                     string linkUrl = m.Value;
-                    // ツイートからURL,改行を削除
+                    // ツイートからURLを除去、改行を半角スペースに置換
                     status.Text = Regex.Replace(status.Text, pattern, "").Replace("\r", "").Replace("\n", " ");
-                    // 棒読みちゃん
+                    // 棒読みちゃんに渡す文字列
                     if (Properties.Settings.Default.IsBouyomiChanMode)
                     {
                         Bouyomi($"{status.User.Name}、{status.Text}");
@@ -349,9 +353,9 @@ namespace TLN2
         /// </summary>
         private void Bouyomi(string text)
         {
-            var bc = new BouyomiChanClient();
-            bc.AddTalkTask(text);
-            bc.Dispose();
+            var bouyomiChanClient = new BouyomiChanClient();
+            bouyomiChanClient.AddTalkTask(text);
+            bouyomiChanClient.Dispose();
         }
 
         /// <summary>
@@ -360,7 +364,7 @@ namespace TLN2
         private void OpenSettingWindowClick(object sender, EventArgs e)
         {
             var window = new SettingWindow(this);
-            window.Show();
+            window.ShowDialog();
         }
     }
 }
