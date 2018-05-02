@@ -22,24 +22,20 @@ namespace TLN2
     /// </summary>
     public partial class MainWindow : Window
     {
-        // 各種Key
-        private string consumerKey;
-        private string consumerSecret;
-        private string accessToken;
-        private string accessTokenSecret;
-
         // トークン関連
-        private Tokens tokens;
-        private OAuth.OAuthSession session;
-        public UserResponse profile;
+        public Tokens tokens;
+        public OAuth.OAuthSession session;
 
         // ストリームのリソース
         private IDisposable filterStream;
         private IDisposable userStream;
 
         // ストリームの状態
-        private bool isStreaming;
+        private bool isUserStreaming;
         private bool isFilterStreaming;
+
+        // ログインしているかどうか
+        public bool isAuthenticated = false;
 
         // テキストブロックにクリックイベントがないのはなぜだ
         private bool mouseLeftButtonDown;
@@ -54,88 +50,11 @@ namespace TLN2
         /// </summary>
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            consumerKey = Properties.Settings.Default.ConsumerKey;
-            consumerSecret = Properties.Settings.Default.ConsumerSecret;
-            accessToken = Properties.Settings.Default.AccessToken;
-            accessTokenSecret = Properties.Settings.Default.AccessTokenSecret;
             // タスクトレイのアイコン設定
             TaskTrayIcon.Icon = Properties.Resources.Icon;
-            // 認証されていない時
-            if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(accessTokenSecret))
-            {
-                // 認証設定へ
-                Authenticate();
-            }
-            else
-            {
-                // トークン生成
-                tokens = Tokens.Create(consumerKey, consumerSecret, accessToken, accessTokenSecret);
-                // プロフィールの取得
-                GetUserProfileAsync();
-            }
-            if (Properties.Settings.Default.IsUserStreamingMode == true)
-            {
-                StartUserStreaming();
-            }
-        }
-
-        /// <summary>
-        /// 認証
-        /// </summary>
-        private async void Authenticate()
-        {
-            try
-            {
-                // 認証用のURL
-                session = OAuth.Authorize(consumerKey, consumerSecret);
-                Uri url = session.AuthorizeUri;
-                // ブラウザを起動
-                System.Diagnostics.Process.Start(url.ToString());
-                // 取得
-                string PIN = "";
-                var task = Task.Run(() =>
-                {
-                    PIN = Interaction.InputBox("PINコードを入力", "認証設定", "", -1, -1);
-                });
-                await task;
-                // トークンを取得して保存
-                tokens = OAuth.GetTokens(session, PIN);
-                Properties.Settings.Default.AccessToken = tokens.AccessToken.ToString();
-                Properties.Settings.Default.AccessTokenSecret = tokens.AccessTokenSecret.ToString();
-                Properties.Settings.Default.Save();
-                GetUserProfileAsync();
-                MessageBox.Show(this, "認証設定を保存");
-            }
-            catch
-            {
-                MessageBox.Show(this, "入力エラー");
-                Environment.Exit(0);
-            }
-        }
-
-        /// <summary>
-        /// 認証のリセット
-        /// </summary>
-        public void ResetToken()
-        {
-            Properties.Settings.Default.AccessToken = null;
-            Properties.Settings.Default.AccessTokenSecret = null;
-            Properties.Settings.Default.Save();
-            // ストリーミングの切断
-            StopUserStreaming();
-            StopFilterStreaming();
-            Authenticate();
-        }
-
-        /// <summary>
-        /// プロフィールの取得
-        /// </summary>
-        private async void GetUserProfileAsync()
-        {
-            await Task.Run(() =>
-            {
-                profile = tokens.Account.VerifyCredentials();
-            });
+            // 設定画面を開く
+            var settingWindow = new SettingWindow(this);
+            settingWindow.ShowDialog();
         }
 
         /// <summary>
@@ -148,7 +67,7 @@ namespace TLN2
             stream.OfType<StatusMessage>().Subscribe(x => CreateTextBlock(x.Status),
                                                     onError: ex => ErrorUserStreaming());
             userStream = stream.Connect();
-            isStreaming = true;
+            isUserStreaming = true;
         }
 
         /// <summary>
@@ -180,18 +99,18 @@ namespace TLN2
         public void StopUserStreaming()
         {
             // ストリームを利用しているなら
-            if (isStreaming == true)
+            if (isUserStreaming == true)
             {
                 // 切断
                 userStream.Dispose();
-                isStreaming = false;
+                isUserStreaming = false;
             }
         }
 
         /// <summary>
         /// フィルターストリーミングの再接続
         /// </summary>
-        public void ErrorFilterStreaming()
+        private void ErrorFilterStreaming()
         {
             // 再接続
             StopFilterStreaming();
@@ -304,7 +223,7 @@ namespace TLN2
             // ランダムな高さに出現
             Canvas.SetTop(tweet, random.Next((int)tweet.ActualHeight, (int)(Height * 0.9)));
             // ランダムな時間の間流れる
-            double time = random.Next(9000, 13000);
+            double time = random.Next(10000, 13000);
             // 右画面外から左画面外へ
             var moveAnimation = new DoubleAnimation
             {
@@ -330,22 +249,25 @@ namespace TLN2
         /// <summary>
         /// 終了ボタン
         /// </summary>
-        private void QuitButtonClick(object sender, RoutedEventArgs e)
+        private void QuitButton_Click(object sender, RoutedEventArgs e)
         {
-            // ストリーミングの切断
-            userStream.Dispose();
-            filterStream.Dispose();
             Close();
         }
 
         /// <summary>
         /// 閉じる前
         /// </summary>
-        private void WindowClosed(object sender, EventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
             // ストリーミングの切断
-            userStream.Dispose();
-            filterStream.Dispose();
+            if (isUserStreaming == true)
+            {
+                userStream.Dispose();
+            }
+            if (isFilterStreaming == true)
+            {
+                filterStream.Dispose();
+            }
         }
 
         /// <summary>
@@ -361,7 +283,7 @@ namespace TLN2
         /// <summary>
         /// 設定画面を開く
         /// </summary>
-        private void OpenSettingWindowClick(object sender, EventArgs e)
+        private void OpenSettingWindow_Click(object sender, EventArgs e)
         {
             var window = new SettingWindow(this);
             window.ShowDialog();

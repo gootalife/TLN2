@@ -6,19 +6,19 @@
         xmlns:local="clr-namespace:TLN2"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="TLN2" Height="350" Width="500"
+        Title="TLN2" Height="1920" Width="1080"
         AllowsTransparency="True"
         Background="Transparent"
         WindowStyle="None"
         ResizeMode="NoResize"
         Topmost="True"
-        WindowState="Maximized" Closed="WindowClosed" Loaded="WindowLoaded">
+        WindowState="Maximized" Closed="Window_Closed" Loaded="WindowLoaded" WindowStartupLocation="CenterScreen">
     <Canvas Name="Root">
         <tb:TaskbarIcon Name="TaskTrayIcon">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="OpenSettingWindow" Header="設定画面を開く" Click="OpenSettingWindowClick"/>
-                    <MenuItem Header="終了" Click="QuitButtonClick"/>
+                    <MenuItem Name="OpenSettingWindow" Header="設定画面を開く" Click="OpenSettingWindow_Click"/>
+                    <MenuItem Header="終了" Click="QuitButton_Click"/>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
             <tb:TaskbarIcon.TrayToolTip>
