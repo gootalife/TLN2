@@ -1,6 +1,4 @@
 ﻿using CoreTweet;
-using Microsoft.VisualBasic;
-using System;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -65,7 +63,7 @@ namespace TLN2
                 }
                 catch
                 {
-                    MessageBox.Show(this, "自動ログインできませんでした。再設定が必要です。");
+                    MessageBox.Show(this, "自動ログインできませんでした。再度ログイン設定が必要です。", "自動ログイン失敗", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             if (main.isAuthenticated == true)

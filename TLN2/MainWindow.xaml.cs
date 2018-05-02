@@ -1,7 +1,6 @@
 ﻿using CoreTweet;
 using CoreTweet.Streaming;
 using FNF.Utility;
-using Microsoft.VisualBasic;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
@@ -37,7 +36,7 @@ namespace TLN2
         // ログインしているかどうか
         public bool isAuthenticated = false;
 
-        // テキストブロックにクリックイベントがないのはなぜだ
+        // テキストブロックにクリックイベントがないのはなぜだなぜだなぜだ
         private bool mouseLeftButtonDown;
 
         public MainWindow()
@@ -144,8 +143,8 @@ namespace TLN2
                     var pattern = @"s?https?://[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+";
                     // ツイートからURLを抽出
                     var r = new Regex(pattern, RegexOptions.IgnoreCase);
-                    Match m = r.Match(status.Text);
-                    string linkUrl = m.Value;
+                    var m = r.Match(status.Text);
+                    var linkUrl = m.Value;
                     // ツイートからURLを除去、改行を半角スペースに置換
                     status.Text = Regex.Replace(status.Text, pattern, "").Replace("\r", "").Replace("\n", " ");
                     // 棒読みちゃんに渡す文字列
@@ -159,7 +158,7 @@ namespace TLN2
                         FontSize = 30,
                         TextWrapping = TextWrapping.NoWrap,
                         Opacity = 0,
-                        Text = $"{status.User.Name}@{status.User.ScreenName} : {status.Text} ",
+                        Text = $@"{status.User.Name}@{status.User.ScreenName} : {status.Text} ",
                         Foreground = new SolidColorBrush(Colors.White),
                         Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)),
                         Effect = new DropShadowEffect
@@ -183,9 +182,9 @@ namespace TLN2
                     // ブラウザで開くモードが有効なら
                     if (Properties.Settings.Default.IsOpenInBrowserMode)
                     {
-                        // クリックイベントもどき
-                        // テキスト上でボタンを押して離したとき
-                        string tweetUrl = $"http://twitter.com/{status.User.ScreenName}/status/{status.Id}";
+                        // クリックイベントもどき なんでクリックイベントがないねん せや！作ったろ！
+                        // テキスト上でクリックして離したとき
+                        var tweetUrl = $@"http://twitter.com/{status.User.ScreenName}/status/{status.Id}";
                         tweet.MouseLeftButtonDown += (s, e) =>
                         {
                             mouseLeftButtonDown = true;
@@ -194,10 +193,7 @@ namespace TLN2
                         {
                             if (mouseLeftButtonDown == true)
                             {
-                                var task = Task.Run(() =>
-                                {
-                                    System.Diagnostics.Process.Start(tweetUrl);
-                                });
+                                System.Diagnostics.Process.Start(tweetUrl);
                             }
                             mouseLeftButtonDown = false;
                         };
@@ -223,7 +219,7 @@ namespace TLN2
             // ランダムな高さに出現
             Canvas.SetTop(tweet, random.Next((int)tweet.ActualHeight, (int)(Height * 0.9)));
             // ランダムな時間の間流れる
-            double time = random.Next(10000, 13000);
+            var time = random.Next(10000, 13000);
             // 右画面外から左画面外へ
             var moveAnimation = new DoubleAnimation
             {
