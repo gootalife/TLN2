@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TLN2"
         mc:Ignorable="d"
-        Title="設定画面" Height="210" Width="200" ResizeMode="NoResize" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Title="設定画面" Height="180" Width="200" ResizeMode="NoResize" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closed="Window_Closed">
     <Canvas>
         <TextBox Name="FilterWord" HorizontalAlignment="Left" Height="20" TextWrapping="NoWrap" VerticalAlignment="Top" Width="109" Grid.ColumnSpan="2" Canvas.Left="64" Canvas.Top="30"/>
         <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="検索ワード" VerticalAlignment="Top" Canvas.Left="10" Canvas.Top="31"/>
@@ -15,6 +15,5 @@
         <Button x:Name="AuthenticateButton" Content="ログイン" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2" Canvas.Left="10" Canvas.Top="117" Width="165" Click="AuthenticateButton_Click"/>
         <TextBlock Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="10"><Run Text="ユーザー"/><Run Text=" "/><Run Text=":"/></TextBlock>
         <TextBlock x:Name="UserName" Canvas.Left="64" TextWrapping="Wrap" Canvas.Top="10"/>
-        <Button x:Name="CloseButton" Content="閉じる" Canvas.Left="10" Canvas.Top="142" Width="163" Click="CloseButton_Click"/>
     </Canvas>
 </Window>

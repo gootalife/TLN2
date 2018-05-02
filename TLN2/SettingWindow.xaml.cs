@@ -120,39 +120,6 @@ namespace TLN2
         }
 
         /// <summary>
-        /// 設定の保存とストリーミング関連
-        /// </summary>
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            // 一時変数から設定に保存
-            Properties.Settings.Default.IsUserStreamingMode = isUserStreamingMode;
-            Properties.Settings.Default.IsBouyomiChanMode = isBouyomiChanMode;
-            Properties.Settings.Default.IsOpenInBrowserMode = isOpenInBrowserMode;
-            Properties.Settings.Default.FilterWord = FilterWord.Text;
-            Properties.Settings.Default.Save();
-            // ログインしているならストリーミングを開始
-            if (Properties.Settings.Default.IsUserStreamingMode && main.isAuthenticated == true)
-            {
-                main.StopUserStreaming();
-                main.StartUserStreaming();
-            }
-            else
-            {
-                main.StopUserStreaming();
-            }
-            if (!string.IsNullOrEmpty(Properties.Settings.Default.FilterWord) && main.isAuthenticated == true)
-            {
-                main.StopFilterStreaming();
-                main.StartFilterStreaming();
-            }
-            else
-            {
-                main.StopFilterStreaming();
-            }
-            Close();
-        }
-
-        /// <summary>
         /// ユーザーストリームの設定
         /// </summary>
         private void UserStreamMode_Checked(object sender, RoutedEventArgs e)
@@ -198,6 +165,35 @@ namespace TLN2
         private void OpenInBrowserMode_Unchecked(object sender, RoutedEventArgs e)
         {
             isOpenInBrowserMode = false;
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            // 一時変数から設定に保存
+            Properties.Settings.Default.IsUserStreamingMode = isUserStreamingMode;
+            Properties.Settings.Default.IsBouyomiChanMode = isBouyomiChanMode;
+            Properties.Settings.Default.IsOpenInBrowserMode = isOpenInBrowserMode;
+            Properties.Settings.Default.FilterWord = FilterWord.Text;
+            Properties.Settings.Default.Save();
+            // ログインしているならストリーミングを開始
+            if (Properties.Settings.Default.IsUserStreamingMode && main.isAuthenticated == true)
+            {
+                main.StopUserStreaming();
+                main.StartUserStreaming();
+            }
+            else
+            {
+                main.StopUserStreaming();
+            }
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.FilterWord) && main.isAuthenticated == true)
+            {
+                main.StopFilterStreaming();
+                main.StartFilterStreaming();
+            }
+            else
+            {
+                main.StopFilterStreaming();
+            }
         }
     }
 }
