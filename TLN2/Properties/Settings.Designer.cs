@@ -118,5 +118,17 @@ namespace TLN2.Properties {
                 this["ConsumerSecret"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool IsDisplayIDMode {
+            get {
+                return ((bool)(this["IsDisplayIDMode"]));
+            }
+            set {
+                this["IsDisplayIDMode"] = value;
+            }
+        }
     }
 }

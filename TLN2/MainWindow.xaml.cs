@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -158,7 +157,7 @@ namespace TLN2
                         FontSize = 30,
                         TextWrapping = TextWrapping.NoWrap,
                         Opacity = 0,
-                        Text = $@"{status.User.Name}@{status.User.ScreenName} : {status.Text} ",
+                        Text = Properties.Settings.Default.IsDisplayIDMode == true ? $@"{status.User.Name}@{status.User.ScreenName} : {status.Text}" : $@"{status.Text}",
                         Foreground = new SolidColorBrush(Colors.White),
                         Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0)),
                         Effect = new DropShadowEffect
@@ -216,12 +215,12 @@ namespace TLN2
         private void MoveTweet(TextBlock tweet)
         {
             var random = new Random();
-            // ランダムな高さに出現
+            // タスクバーを隠さないランダムな高さに出現
             Canvas.SetTop(tweet, random.Next((int)tweet.ActualHeight, (int)(Height * 0.9)));
             // ランダムな時間の間流れる
             var time = random.Next(10000, 13000);
             // 右画面外から左画面外へ
-            var moveAnimation = new DoubleAnimation
+            var animation = new DoubleAnimation
             {
                 From = Width,
                 To = -1 * tweet.ActualWidth - 10,
@@ -238,7 +237,7 @@ namespace TLN2
                 Root.Children.Remove(tweet);
             };
             // そぉぃ
-            tweet.BeginAnimation(LeftProperty, moveAnimation);
+            tweet.BeginAnimation(LeftProperty, animation);
             deleteTimer.Start();
         }
 

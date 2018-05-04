@@ -22,6 +22,7 @@ namespace TLN2
         private bool isUserStreamingMode = Properties.Settings.Default.IsUserStreamingMode;
         private bool isBouyomiChanMode = Properties.Settings.Default.IsBouyomiChanMode;
         private bool isOpenInBrowserMode = Properties.Settings.Default.IsOpenInBrowserMode;
+        private bool isDisplayIDMode = Properties.Settings.Default.IsDisplayIDMode;
 
         private MainWindow main;
 
@@ -49,6 +50,7 @@ namespace TLN2
             UserStreamingMode.IsChecked = Properties.Settings.Default.IsUserStreamingMode;
             BouyomiChanMode.IsChecked = Properties.Settings.Default.IsBouyomiChanMode;
             OpenInBrowserMode.IsChecked = Properties.Settings.Default.IsOpenInBrowserMode;
+            DisplayIDMode.IsChecked = Properties.Settings.Default.IsDisplayIDMode;
 
             // 各種KEYが存在するならトークンの取得を試みる
             if (!string.IsNullOrEmpty(consumerKey) && !string.IsNullOrEmpty(consumerSecret) && !string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(accessTokenSecret))
@@ -78,11 +80,10 @@ namespace TLN2
         public async void GetUserProfileAsync()
         {
             // 取得
-            var task = Task.Run(() =>
+            await Task.Run(() =>
             {
                 profile = main.tokens.Account.VerifyCredentials();
             });
-            await task;
             UserName.Text = $"{profile.Name}@{profile.ScreenName}";
         }
 
@@ -167,6 +168,24 @@ namespace TLN2
             isOpenInBrowserMode = false;
         }
 
+        /// <summary>
+        /// ツイートにIDを表示させるか
+        /// </summary>
+        private void DisplayIDMode_Checked(object sender, RoutedEventArgs e)
+        {
+            isDisplayIDMode = true;
+        }
+
+        private void DisplayIDMode_Unchecked(object sender, RoutedEventArgs e)
+        {
+            isDisplayIDMode = false;
+        }
+
+        /// <summary>
+        /// 設定の保存
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Closed(object sender, System.EventArgs e)
         {
             // 一時変数から設定に保存
@@ -174,6 +193,7 @@ namespace TLN2
             Properties.Settings.Default.IsBouyomiChanMode = isBouyomiChanMode;
             Properties.Settings.Default.IsOpenInBrowserMode = isOpenInBrowserMode;
             Properties.Settings.Default.FilterWord = FilterWord.Text;
+            Properties.Settings.Default.IsDisplayIDMode = isDisplayIDMode;
             Properties.Settings.Default.Save();
             // ログインしているならストリーミングを開始
             if (Properties.Settings.Default.IsUserStreamingMode && main.isAuthenticated == true)
@@ -194,6 +214,11 @@ namespace TLN2
             {
                 main.StopFilterStreaming();
             }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }
